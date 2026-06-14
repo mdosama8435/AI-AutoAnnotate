@@ -1,0 +1,128 @@
+[
+  {
+    "action_type": "highlight",
+    "start_time": 0.0,
+    "end_time": 7.8,
+    "target_box": {
+      "x_min": 673,
+      "y_min": 0,
+      "x_max": 800,
+      "y_max": 120
+    },
+    "source_box": null,
+    "color": "red",
+    "thickness": 3,
+    "path_points": null,
+    "text": null,
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "highlight",
+    "start_time": 9.7,
+    "end_time": 17.5,
+    "target_box": {
+      "x_min": 14,
+      "y_min": 42,
+      "x_max": 566,
+      "y_max": 70
+    },
+    "source_box": null,
+    "color": "red",
+    "thickness": 3,
+    "path_points": null,
+    "text": null,
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "highlight",
+    "start_time": 19.5,
+    "end_time": 27.3,
+    "target_box": {
+      "x_min": 13,
+      "y_min": 89,
+      "x_max": 126,
+      "y_max": 116
+    },
+    "source_box": null,
+    "color": "red",
+    "thickness": 3,
+    "path_points": null,
+    "text": null,
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "highlight",
+    "start_time": 29.2,
+    "end_time": 37.0,
+    "target_box": {
+      "x_min": 251,
+      "y_min": 90,
+      "x_max": 553,
+      "y_max": 362
+    },
+    "source_box": null,
+    "color": "red",
+    "thickness": 3,
+    "path_points": null,
+    "text": null,
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "highlight",
+    "start_time": 39.0,
+    "end_time": 46.8,
+    "target_box": {
+      "x_min": 13,
+      "y_min": 122,
+      "x_max": 125,
+      "y_max": 149
+    },
+    "source_box": null,
+    "color": "red",
+    "thickness": 3,
+    "path_points": null,
+    "text": null,
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "highlight",
+    "start_time": 48.7,
+    "end_time": 56.5,
+    "target_box": {
+      "x_min": 13,
+      "y_min": 156,
+      "x_max": 125,
+      "y_max": 183
+    },
+    "source_box": null,
+    "color": "red",
+    "thickness": 3,
+    "path_points": null,
+    "text": null,
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "highlight",
+    "start_time": 58.4,
+    "end_time": 66.2,
+    "target_box": {
+      "x_min": 13,
+      "y_min": 189,
+      "x_max": 126,
+      "y_max": 216
+    },
+    "source_box": null,
+    "color": "red",
+    "thickness": 3,
+    "path_points": null,
+    "text": null,
+    "text_position": null,
+    "confidence": 1.0
+  }
+]
