@@ -21,7 +21,7 @@ class MathExpressionRenderer:
         fig = plt.figure(figsize=(0.01, 0.01))
         fig.text(0, 0, f"${formula}$", fontsize=self.font_size, color=color)
         buf = io.BytesIO()
-        fig.savefig(buf, format='png', transparent=True, dpi=300, bbox_inches='tight', pad_inches=0.0)
+        fig.savefig(buf, format='png', transparent=True, dpi=105, bbox_inches='tight', pad_inches=0.0)
         plt.close(fig)
         
         buf.seek(0)

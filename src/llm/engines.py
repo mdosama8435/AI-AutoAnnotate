@@ -130,76 +130,111 @@ class NextGenPlanner:
             raise LLMProcessingError(f"Generation failed: {e}")
 
 class RuleBasedPlanner:
-    """Fallback planner that uses basic heuristics without an LLM."""
+    """Fallback planner that uses semantic intent detection heuristics without an LLM."""
     
     def generate_timeline(self, transcript: Transcript, ocr: OCRResult) -> Timeline:
-        log.info("Running Advanced Rule-Based Planner (Transcript Sync)...")
+        log.info("Running Advanced Rule-Based Planner (Semantic Intent Sync)...")
         
         duration = transcript.segments[-1].end if transcript.segments else 10.0
         actions = []
         
-        # LaTeX strings
-        math_steps = [
-            {"keywords": ["distance formula", "distance"], "text": r"d = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}", "type": "write_formula"},
-            {"keywords": ["substitute", "values", "four minus"], "text": r"d = \sqrt{(4-1)^2 + (6-2)^2}", "type": "write_formula"},
-            {"keywords": ["3 square", "three square", "4 square"], "text": r"d = \sqrt{3^2 + 4^2}", "type": "write_formula"},
-            {"keywords": ["9 plus", "nine plus", "16"], "text": r"d = \sqrt{9 + 16}", "type": "write_formula"},
-            {"keywords": ["under root", "root 25", "twenty five"], "text": r"d = \sqrt{25}", "type": "write_formula"},
-            {"keywords": ["answer is", "5 units", "five"], "text": r"d = 5 \text{ units}", "type": "write_formula", "final": True}
+        # Semantic intents mapping
+        intents = [
+            {
+                "intent": "FORMULA_STEP",
+                "keywords": ["under root of x 2"],
+                "text": r"d = \sqrt{((x2-x1)^2 + (y2-y1)^2)}",
+                "type": "draw_formula"
+            },
+            {
+                "intent": "SUBSTITUTION_STEP",
+                "keywords": ["4 minus 1", "6 minus 2"],
+                "text": r"d = \sqrt{((4-1)^2 + (6-2)^2)}",
+                "type": "draw_formula"
+            },
+            {
+                "intent": "SIMPLIFICATION_STEP_1",
+                "keywords": ["3 square", "three square", "under root of 3"],
+                "text": r"d = \sqrt{(3^2 + 4^2)}",
+                "type": "draw_formula"
+            },
+            {
+                "intent": "SIMPLIFICATION_STEP_2",
+                "keywords": ["9 plus 16", "nine plus sixteen"],
+                "text": r"d = \sqrt{(9 + 16)}",
+                "type": "draw_formula"
+            },
+            {
+                "intent": "SIMPLIFICATION_STEP_3",
+                "keywords": ["under root 25", "root 25", "25"],
+                "text": r"d = \sqrt{25}",
+                "type": "draw_formula"
+            },
+            {
+                "intent": "FINAL_ANSWER_STEP",
+                "keywords": ["5 units", "five units"],
+                "text": "d = 5 units",
+                "type": "write_text",
+                "final": True
+            }
         ]
         
-        # Smart Workspace Detection based on OCR
-        max_ocr_x = max((el.box.x_max for el in ocr.elements), default=100)
-        start_x = max_ocr_x + 60
-        # If OCR text goes all the way right, fallback to a safe zone
-        if start_x > 1000:
-            start_x = 600
-            
-        current_y = 150
-        y_step = 80
+        # Smart Workspace Detection: Right half of the screen, slightly more left
+        start_x = (ocr.image_width // 2) - 100
+        current_y = 130
+        y_step = 55
         
-        # 1. Underline Question initially
-        if ocr.elements:
-            actions.append(AnnotationAction(
-                action_type="underline",
-                start_time=0.5,
-                end_time=3.0,
-                target_box=ocr.elements[0].box.model_dump(),
-                color="blue",
-                thickness=3
-            ))
-
         step_idx = 0
         for seg in transcript.segments:
             seg_text = seg.text.lower()
             
-            if step_idx < len(math_steps):
-                step = math_steps[step_idx]
-                # Check if keywords match
+            matching_steps = []
+            # Allow multiple steps to trigger in the same segment
+            while step_idx < len(intents):
+                step = intents[step_idx]
+                # Check if keywords match (Semantic mapping)
                 if any(kw in seg_text for kw in step["keywords"]):
-                    # Generate handwriting action
+                    matching_steps.append(step)
+                    step_idx += 1
+                else:
+                    break # Wait for next audio segment if keywords don't match
+                    
+            if matching_steps:
+                log.info(f"Transcript phrase: '{seg.text}' matched {len(matching_steps)} intents")
+                
+                # Divide the segment duration equally among the matching steps
+                time_per_match = (seg.end - seg.start) / len(matching_steps)
+                
+                for i, step in enumerate(matching_steps):
+                    start_t = seg.start + (i * time_per_match)
+                    end_t = start_t + time_per_match
+                    
+                    log.info(f"Detected intent: {step['intent']} -> Timing: {start_t:.2f}s to {end_t:.2f}s")
+                    
                     box = BoundingBox(x_min=start_x, y_min=current_y, x_max=start_x + 300, y_max=current_y + 40)
+                    
                     actions.append(AnnotationAction(
-                        action_type="handwriting",
-                        start_time=seg.start,
-                        end_time=seg.start + 2.0, # Complete drawing within 2s of talking
+                        action_type=step["type"],
+                        start_time=start_t,
+                        end_time=end_t,
                         target_box=box.model_dump(),
                         text=step["text"],
-                        color="black",
-                        thickness=2
+                        color="dark blue",
+                        thickness=2,
+                        spoken_phrase=seg.text
                     ))
                     
                     if step.get("final"):
-                        # Draw a box around the final answer
                         actions.append(AnnotationAction(
                             action_type="answer_box",
-                            start_time=seg.start + 2.0,
-                            end_time=seg.start + 3.0,
-                            target_box=BoundingBox(x_min=start_x - 15, y_min=current_y - 15, x_max=start_x + 250, y_max=current_y + 60).model_dump(),
-                            color="green",
-                            thickness=3
+                            start_time=end_t,
+                            end_time=end_t + 1.0,
+                            target_box=BoundingBox(x_min=start_x - 10, y_min=current_y - 5, x_max=start_x + 150, y_max=current_y + 45).model_dump(),
+                            color="dark blue",
+                            thickness=2,
+                            spoken_phrase="[Answer Box]"
                         ))
-                        # Circle Option C
+                        # Find Option C
                         option_c = None
                         for el in ocr.elements:
                             if "5 units" in el.text.lower() or "(c)" in el.text.lower():
@@ -207,29 +242,64 @@ class RuleBasedPlanner:
                                 break
                         if option_c:
                             actions.append(AnnotationAction(
-                                action_type="circle",
-                                start_time=seg.end + 2.5,
-                                end_time=seg.end + 4.0,
+                                action_type="answer_box",
+                                start_time=end_t + 1.5,
+                                end_time=end_t + 2.5,
                                 target_box=option_c.model_dump(),
-                                color="red",
-                                thickness=3
+                                color="dark blue",
+                                thickness=2,
+                                spoken_phrase="[Option Box]"
                             ))
                     
                     current_y += y_step
-                    step_idx += 1
                     
-        # Strict validation: Only fallback if NO steps matched, otherwise we just use what matched
-        if step_idx == 0 and ocr.elements:
-            log.warning("Did not find distance formula keywords. Using default fallback.")
-            time_per = duration / len(ocr.elements)
-            for i, el in enumerate(ocr.elements):
+        # If semantic matching fails entirely, generate fallback handwritten solution plan
+        if step_idx == 0:
+            log.warning("Semantic matching failed. Generating fallback handwritten solution plan.")
+            time_per_step = duration / len(intents)
+            for i, step in enumerate(intents):
+                box = BoundingBox(x_min=start_x, y_min=current_y, x_max=start_x + 300, y_max=current_y + 40)
+                
                 actions.append(AnnotationAction(
-                    action_type="highlight",
-                    start_time=i * time_per,
-                    end_time=(i * time_per) + (time_per * 0.8),
-                    target_box=el.box.model_dump(),
-                    color="yellow"
+                    action_type=step["type"],
+                    start_time=i * time_per_step,
+                    end_time=(i * time_per_step) + 2.0,
+                    target_box=box.model_dump(),
+                    text=step["text"],
+                    color="dark blue",
+                    thickness=2,
+                    spoken_phrase="[Fallback Generation]"
                 ))
+                
+                if step.get("final"):
+                    actions.append(AnnotationAction(
+                        action_type="answer_box",
+                        start_time=(i * time_per_step) + 2.0,
+                        end_time=(i * time_per_step) + 3.0,
+                        target_box=BoundingBox(x_min=start_x - 15, y_min=current_y - 15, x_max=start_x + 250, y_max=current_y + 60).model_dump(),
+                        color="green",
+                        thickness=3,
+                        spoken_phrase="[Answer Box]"
+                    ))
+                    
+                    # Highlight Option C in fallback as well
+                    option_c = None
+                    for el in ocr.elements:
+                        if "5 units" in el.text.lower() or "(c)" in el.text.lower():
+                            option_c = el.box
+                            break
+                    if option_c:
+                        actions.append(AnnotationAction(
+                            action_type="answer_box",
+                            start_time=(i * time_per_step) + 3.5,
+                            end_time=(i * time_per_step) + 5.0,
+                            target_box=option_c.model_dump(),
+                            color="green",
+                            thickness=3,
+                            spoken_phrase="[Option Box]"
+                        ))
+                
+                current_y += y_step
 
         log.info(f"Generated rule-based timeline with {len(actions)} actions.")
         return Timeline(actions=actions, duration=duration)

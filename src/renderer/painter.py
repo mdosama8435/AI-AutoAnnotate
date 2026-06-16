@@ -3,6 +3,7 @@ import numpy as np
 from typing import List, Tuple
 from ..models.core import AnnotationAction
 from .math_renderer import MathExpressionRenderer
+from .handwriting import HandwritingRenderer
 
 class FrameRenderer:
     """Advanced renderer supporting dynamic, time-based annotations with persistence."""
@@ -16,9 +17,11 @@ class FrameRenderer:
             "magenta": (255, 0, 255),
             "cyan": (255, 255, 0),
             "black": (0, 0, 0),
-            "white": (255, 255, 255)
+            "white": (255, 255, 255),
+            "dark blue": (139, 0, 0)
         }
         self.math_renderer = MathExpressionRenderer()
+        self.handwriting_renderer = HandwritingRenderer()
         
         # State optimization
         self.last_t = -1.0
@@ -43,6 +46,11 @@ class FrameRenderer:
 
         img = self.base_img.copy()
         
+        # Simple vertical stacking layout
+        layout_y = 200
+        layout_x = 100
+        line_spacing = 60
+        
         for action in actions:
             if current_time >= action.start_time:
                 # Calculate progress [0.0 to 1.0]
@@ -55,42 +63,32 @@ class FrameRenderer:
                 
                 color_bgr = self._get_color(action.color)
                 
-                # --- Basic Types ---
-                if action.action_type == "highlight" and action.target_box:
-                    overlay = img.copy()
-                    current_w = int(action.target_box.width * progress)
-                    cv2.rectangle(
-                        overlay,
-                        (action.target_box.x_min, action.target_box.y_min),
-                        (action.target_box.x_min + current_w, action.target_box.y_max),
-                        color_bgr,
-                        -1
+                if action.action_type == "draw_formula" and action.text:
+                    x_pos = action.target_box.x_min if action.target_box else layout_x
+                    y_pos = action.target_box.y_min if action.target_box else layout_y
+                    
+                    img = self.math_renderer.draw_formula(
+                        img, action.text, 
+                        x_pos, y_pos, 
+                        color_bgr, progress=progress
                     )
-                    cv2.addWeighted(overlay, 0.4, img, 0.6, 0, img)
                     
-                elif action.action_type in ["rectangle", "box", "answer_box"] and action.target_box:
-                    # Animate drawing the box
-                    pts = [
-                        (action.target_box.x_min, action.target_box.y_min),
-                        (action.target_box.x_max, action.target_box.y_min),
-                        (action.target_box.x_max, action.target_box.y_max),
-                        (action.target_box.x_min, action.target_box.y_max),
-                        (action.target_box.x_min, action.target_box.y_min)
-                    ]
-                    total_len = 4
-                    drawn_len = total_len * progress
+                    if not action.target_box:
+                        layout_y += line_spacing
+                        
+                elif action.action_type == "write_text" and action.text:
+                    x_pos = action.target_box.x_min if action.target_box else layout_x
+                    y_pos = action.target_box.y_min if action.target_box else layout_y
                     
-                    for i in range(4):
-                        if drawn_len > i:
-                            p1 = pts[i]
-                            p2 = pts[i+1]
-                            seg_prog = min(1.0, drawn_len - i)
-                            cur_p2 = (
-                                int(p1[0] + (p2[0] - p1[0]) * seg_prog),
-                                int(p1[1] + (p2[1] - p1[1]) * seg_prog)
-                            )
-                            cv2.line(img, p1, cur_p2, color_bgr, action.thickness)
-                            
+                    img = self.handwriting_renderer.draw_text(
+                        img, action.text, 
+                        x_pos, y_pos, 
+                        color_bgr, progress=progress
+                    )
+                    
+                    if not action.target_box:
+                        layout_y += line_spacing
+                        
                 elif action.action_type == "underline" and action.target_box:
                     y = action.target_box.y_max + 5
                     current_w = int(action.target_box.width * progress)
@@ -109,20 +107,42 @@ class FrameRenderer:
                     cv2.ellipse(
                         img, center, (radius, int(radius * 0.8)), 0, 0, end_angle, color_bgr, action.thickness
                     )
+                        
+                elif action.action_type == "answer_box":
+                    box_x = layout_x - 20
+                    box_y = layout_y - line_spacing - 10
+                    box_w = 300
+                    box_h = 50
                     
-                elif action.action_type == "arrow" and action.source_box and action.target_box:
-                    pt1 = action.source_box.center
-                    pt2 = action.target_box.center
-                    cur_x = int(pt1[0] + (pt2[0] - pt1[0]) * progress)
-                    cur_y = int(pt1[1] + (pt2[1] - pt1[1]) * progress)
-                    cv2.arrowedLine(img, pt1, (cur_x, cur_y), color_bgr, action.thickness, tipLength=0.1)
-
-                elif action.action_type in ["write_formula", "handwriting"] and action.text and action.target_box:
-                    img = self.math_renderer.draw_formula(
-                        img, action.text, 
-                        action.target_box.x_min, action.target_box.y_min, 
-                        color_bgr, progress=progress
-                    )
+                    if action.target_box:
+                        box_x = action.target_box.x_min
+                        box_y = action.target_box.y_min
+                        box_w = action.target_box.width
+                        box_h = action.target_box.height
+                    
+                    pts = [
+                        (box_x, box_y),
+                        (box_x + box_w, box_y),
+                        (box_x + box_w, box_y + box_h),
+                        (box_x, box_y + box_h),
+                        (box_x, box_y)
+                    ]
+                    total_len = 4
+                    drawn_len = total_len * progress
+                    
+                    for i in range(4):
+                        if drawn_len > i:
+                            p1 = pts[i]
+                            p2 = pts[i+1]
+                            seg_prog = min(1.0, drawn_len - i)
+                            cur_p2 = (
+                                int(p1[0] + (p2[0] - p1[0]) * seg_prog),
+                                int(p1[1] + (p2[1] - p1[1]) * seg_prog)
+                            )
+                            cv2.line(img, p1, cur_p2, color_bgr, action.thickness)
+                    
+                    if not action.target_box:
+                        layout_y += line_spacing
                     
         self.last_t = current_time
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)

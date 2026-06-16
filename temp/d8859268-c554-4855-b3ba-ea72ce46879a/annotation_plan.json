@@ -3,6 +3,7 @@
     "action_type": "underline",
     "start_time": 0.5,
     "end_time": 3.0,
+    "spoken_phrase": null,
     "target_box": {
       "x_min": 673,
       "y_min": 0,
@@ -21,6 +22,7 @@
     "action_type": "handwriting",
     "start_time": 0.0,
     "end_time": 2.0,
+    "spoken_phrase": null,
     "target_box": {
       "x_min": 860,
       "y_min": 150,

@@ -18,10 +18,11 @@ class HandwritingRenderer:
                 self._font_cache[size] = ImageFont.load_default()
         return self._font_cache[size]
 
-    def draw_text(self, img_np: np.ndarray, text: str, x: int, y: int, color: tuple, size: int = 36, progress: float = 1.0) -> np.ndarray:
+    def draw_text(self, img_np: np.ndarray, text: str, x: int, y: int, color: tuple = (139, 0, 0), size: int = 36, progress: float = 1.0) -> np.ndarray:
         """
         Draws handwritten text onto an OpenCV image (numpy array).
-        Uses progress (0.0 to 1.0) to reveal characters progressively.
+        Uses progress (0.0 to 1.0) to reveal characters progressively left-to-right.
+        Default color is dark blue.
         """
         if not text or progress <= 0:
             return img_np
@@ -37,7 +38,6 @@ class HandwritingRenderer:
         visible_text = text[:char_count]
         
         # PIL colors are RGB. The incoming color is BGR from OpenCV logic.
-        # Let's assume incoming is BGR: (B, G, R) -> PIL expects (R, G, B)
         r, g, b = color[2], color[1], color[0]
         
         draw.text((x, y), visible_text, font=font, fill=(r, g, b))

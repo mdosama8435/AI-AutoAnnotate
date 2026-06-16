@@ -122,7 +122,8 @@ with col_editor:
                 "start": a.start_time,
                 "end": a.end_time,
                 "color": a.color,
-                "text": a.text if a.text else ""
+                "text": a.text if a.text else "",
+                "spoken_phrase": a.spoken_phrase if hasattr(a, "spoken_phrase") and a.spoken_phrase else ""
             })
         df_edit = pd.DataFrame(editor_data)
         
@@ -135,14 +136,16 @@ with col_editor:
                     "Action",
                     help="Type of annotation",
                     width="medium",
-                    options=["highlight", "underline", "box", "circle", "arrow", "curved_arrow", "write_formula", "handwriting", "eraser"]
+                    options=["write_formula", "handwriting", "answer_box", "eraser"]
                 ),
                 "start": st.column_config.NumberColumn("Start (s)", format="%.2f", step=0.1),
                 "end": st.column_config.NumberColumn("End (s)", format="%.2f", step=0.1),
                 "color": st.column_config.SelectboxColumn(
                     "Color",
-                    options=["red", "blue", "green", "yellow", "cyan", "magenta", "black", "white"]
-                )
+                    options=["dark blue", "black", "red", "green"]
+                ),
+                "text": st.column_config.TextColumn("Rendered Text"),
+                "spoken_phrase": st.column_config.TextColumn("Spoken Phrase")
             }
         )
         

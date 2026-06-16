@@ -1,0 +1,135 @@
+[
+  {
+    "action_type": "draw_formula",
+    "start_time": 0.0,
+    "end_time": 2.0,
+    "spoken_phrase": "[Fallback Generation]",
+    "target_box": {
+      "x_min": 860,
+      "y_min": 150,
+      "x_max": 1160,
+      "y_max": 190
+    },
+    "source_box": null,
+    "color": "dark blue",
+    "thickness": 2,
+    "path_points": null,
+    "text": "d = \\sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}",
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "draw_formula",
+    "start_time": 11.363333333333335,
+    "end_time": 13.363333333333335,
+    "spoken_phrase": "[Fallback Generation]",
+    "target_box": {
+      "x_min": 860,
+      "y_min": 230,
+      "x_max": 1160,
+      "y_max": 270
+    },
+    "source_box": null,
+    "color": "dark blue",
+    "thickness": 2,
+    "path_points": null,
+    "text": "d = \\sqrt{(4-1)^2 + (6-2)^2}",
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "draw_formula",
+    "start_time": 22.72666666666667,
+    "end_time": 24.72666666666667,
+    "spoken_phrase": "[Fallback Generation]",
+    "target_box": {
+      "x_min": 860,
+      "y_min": 310,
+      "x_max": 1160,
+      "y_max": 350
+    },
+    "source_box": null,
+    "color": "dark blue",
+    "thickness": 2,
+    "path_points": null,
+    "text": "d = \\sqrt{3^2 + 4^2}",
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "draw_formula",
+    "start_time": 34.09,
+    "end_time": 36.09,
+    "spoken_phrase": "[Fallback Generation]",
+    "target_box": {
+      "x_min": 860,
+      "y_min": 390,
+      "x_max": 1160,
+      "y_max": 430
+    },
+    "source_box": null,
+    "color": "dark blue",
+    "thickness": 2,
+    "path_points": null,
+    "text": "d = \\sqrt{9 + 16}",
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "draw_formula",
+    "start_time": 45.45333333333334,
+    "end_time": 47.45333333333334,
+    "spoken_phrase": "[Fallback Generation]",
+    "target_box": {
+      "x_min": 860,
+      "y_min": 470,
+      "x_max": 1160,
+      "y_max": 510
+    },
+    "source_box": null,
+    "color": "dark blue",
+    "thickness": 2,
+    "path_points": null,
+    "text": "d = \\sqrt{25}",
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "write_text",
+    "start_time": 56.81666666666668,
+    "end_time": 58.81666666666668,
+    "spoken_phrase": "[Fallback Generation]",
+    "target_box": {
+      "x_min": 860,
+      "y_min": 550,
+      "x_max": 1160,
+      "y_max": 590
+    },
+    "source_box": null,
+    "color": "dark blue",
+    "thickness": 2,
+    "path_points": null,
+    "text": "d = 5",
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "answer_box",
+    "start_time": 58.81666666666668,
+    "end_time": 59.81666666666668,
+    "spoken_phrase": "[Answer Box]",
+    "target_box": {
+      "x_min": 845,
+      "y_min": 535,
+      "x_max": 1110,
+      "y_max": 610
+    },
+    "source_box": null,
+    "color": "green",
+    "thickness": 3,
+    "path_points": null,
+    "text": null,
+    "text_position": null,
+    "confidence": 1.0
+  }
+]

@@ -1,0 +1,135 @@
+[
+  {
+    "action_type": "draw_formula",
+    "start_time": 15.72,
+    "end_time": 24.54,
+    "spoken_phrase": " is given as under root of x 2 minus x 1 whole square plus y 2 minus y 1 whole square.",
+    "target_box": {
+      "x_min": 300,
+      "y_min": 130,
+      "x_max": 600,
+      "y_max": 170
+    },
+    "source_box": null,
+    "color": "dark blue",
+    "thickness": 2,
+    "path_points": null,
+    "text": "d = \\sqrt{((x2-x1)^2 + (y2-y1)^2)}",
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "draw_formula",
+    "start_time": 30.98,
+    "end_time": 41.26,
+    "spoken_phrase": " calculation, we will get x 2 as 4 and we will write as 4 minus 1 whole square plus y 2 is 6.",
+    "target_box": {
+      "x_min": 300,
+      "y_min": 185,
+      "x_max": 600,
+      "y_max": 225
+    },
+    "source_box": null,
+    "color": "dark blue",
+    "thickness": 2,
+    "path_points": null,
+    "text": "d = \\sqrt{((4-1)^2 + (6-2)^2)}",
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "draw_formula",
+    "start_time": 41.62,
+    "end_time": 49.28,
+    "spoken_phrase": " So, we will write as 6 minus 2 whole square. So, d comes out to be under root of 3 square",
+    "target_box": {
+      "x_min": 300,
+      "y_min": 240,
+      "x_max": 600,
+      "y_max": 280
+    },
+    "source_box": null,
+    "color": "dark blue",
+    "thickness": 2,
+    "path_points": null,
+    "text": "d = \\sqrt{(3^2 + 4^2)}",
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "draw_formula",
+    "start_time": 49.28,
+    "end_time": 58.6,
+    "spoken_phrase": " plus 4 square which will be equal to under root of 9 plus 16 which comes out to be under root",
+    "target_box": {
+      "x_min": 300,
+      "y_min": 295,
+      "x_max": 600,
+      "y_max": 335
+    },
+    "source_box": null,
+    "color": "dark blue",
+    "thickness": 2,
+    "path_points": null,
+    "text": "d = \\sqrt{(9 + 16)}",
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "draw_formula",
+    "start_time": 58.6,
+    "end_time": 63.39,
+    "spoken_phrase": " 25. So, the answer will be d is equal to 5 units ok. So, option number c will be the answer.",
+    "target_box": {
+      "x_min": 300,
+      "y_min": 350,
+      "x_max": 600,
+      "y_max": 390
+    },
+    "source_box": null,
+    "color": "dark blue",
+    "thickness": 2,
+    "path_points": null,
+    "text": "d = \\sqrt{25}",
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "write_text",
+    "start_time": 63.39,
+    "end_time": 68.18,
+    "spoken_phrase": " 25. So, the answer will be d is equal to 5 units ok. So, option number c will be the answer.",
+    "target_box": {
+      "x_min": 300,
+      "y_min": 405,
+      "x_max": 600,
+      "y_max": 445
+    },
+    "source_box": null,
+    "color": "dark blue",
+    "thickness": 2,
+    "path_points": null,
+    "text": "d = 5 units",
+    "text_position": null,
+    "confidence": 1.0
+  },
+  {
+    "action_type": "answer_box",
+    "start_time": 68.18,
+    "end_time": 69.18,
+    "spoken_phrase": "[Answer Box]",
+    "target_box": {
+      "x_min": 290,
+      "y_min": 400,
+      "x_max": 450,
+      "y_max": 450
+    },
+    "source_box": null,
+    "color": "dark blue",
+    "thickness": 2,
+    "path_points": null,
+    "text": null,
+    "text_position": null,
+    "confidence": 1.0
+  }
+]

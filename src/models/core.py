@@ -57,12 +57,13 @@ class OCRResult(BaseModel):
 
 class AnnotationAction(BaseModel):
     """An action to be drawn on the video."""
-    action_type: str  # highlight, underline, circle, rectangle, label, arrow, curved_arrow, write_formula, handwriting, eraser
+    action_type: str  # highlight, underline, circle, rectangle, label, arrow, curved_arrow, write_formula, handwriting, eraser, answer_box
     start_time: float
     end_time: float
+    spoken_phrase: Optional[str] = None
     target_box: Optional[BoundingBox] = None
     source_box: Optional[BoundingBox] = None # Used for arrows (from source to target)
-    color: str = "red"
+    color: str = "dark blue"
     thickness: int = 2
     # For 'draw_path' or 'handwriting'
     path_points: Optional[List[Tuple[int, int]]] = None

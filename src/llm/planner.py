@@ -27,44 +27,38 @@ class AnnotationPlanner:
         log.info("Generating annotation timeline via LLM...")
         
         # Prepare context for the prompt
-        transcript_data = [
-            {"id": s.id, "text": s.text, "start": s.start, "end": s.end} 
-            for s in transcript.segments
-        ]
-        
-        ocr_data = [
-            {
-                "region_id": i, 
-                "text": e.text, 
-                "box": {"xmin": e.box.x_min, "ymin": e.box.y_min, "xmax": e.box.x_max, "ymax": e.box.y_max}
-            }
-            for i, e in enumerate(ocr.elements)
-        ]
-        
+        transcript_data = []
+        for s in transcript.segments:
+            transcript_data.append({
+                "text": s.text,
+                "start": s.start,
+                "end": s.end,
+                "words": [{"word": w.word, "start": w.start, "end": w.end} for w in s.words]
+            })
+            
         prompt = f"""
-        You are an expert educational video director. You have:
-        1. A transcript of a teacher speaking.
-        2. A list of detected OCR regions on the screen.
+        You are an expert educational video director generating a handwritten math solution video.
         
-        Your task is to create a sequence of drawing actions that synchronize with the teacher's speech.
-        
-        Transcript Segments:
+        Transcript Segments (with exact word-level timestamps):
         {json.dumps(transcript_data, indent=2)}
         
-        Available OCR Regions:
-        {json.dumps(ocr_data, indent=2)}
+        Your task is to create a sequence of drawing actions that synchronize perfectly with the teacher's speech.
         
         Rules:
         - Output ONLY a JSON array of actions. No markdown formatting, no explanation.
         - Each action should be a JSON object with:
-          - "action_type": string (one of "highlight", "underline", "box")
-          - "start_time": float (seconds, match with transcript start time)
-          - "end_time": float (seconds, match with transcript end time)
-          - "target_box": object {{"x_min": int, "y_min": int, "x_max": int, "y_max": int}} (Select an appropriate region box based on context)
-          - "color": string (e.g., "red", "blue", "green", "yellow")
-          - "thickness": int (e.g., 2, 4)
+          - "action_type": string (MUST be "write_formula", "handwriting", or "answer_box")
+          - "spoken_phrase": string (the exact phrase spoken that triggers this step)
+          - "start_time": float (exact start time of the first word in the phrase, from the provided word timestamps)
+          - "end_time": float (exact end time of the last word in the phrase)
+          - "text": string (the exact math formula or text to render)
         
-        Create a logical sequence of highlights or underlines as the teacher speaks.
+        Guidelines:
+        - DO NOT use pink overlays, highlights, rectangles, or opaque boxes.
+        - Render handwritten annotations only.
+        - Write formulas progressively exactly when they are spoken. 
+        - E.g. When narration says "distance formula", text should be "d = \\sqrt{{(x_2 - x_1)^2 + (y_2 - y_1)^2}}".
+        - Render each step only when narration reaches that step.
         """
         
         try:
@@ -82,33 +76,22 @@ class AnnotationPlanner:
             
             actions = []
             for item in actions_data:
-                box_data = item.get("target_box", {})
-                
                 action = AnnotationAction(
-                    action_type=item.get("action_type", "highlight"),
+                    action_type=item.get("action_type", "write_formula"),
+                    spoken_phrase=item.get("spoken_phrase", ""),
                     start_time=float(item.get("start_time", 0.0)),
                     end_time=float(item.get("end_time", 1.0)),
-                    color=item.get("color", "red"),
-                    thickness=int(item.get("thickness", 2))
+                    color="dark blue",
+                    thickness=2,
+                    text=item.get("text", "")
                 )
-                
-                # Check if box_data is not empty
-                if box_data and all(k in box_data for k in ("x_min", "y_min", "x_max", "y_max")):
-                    from ..models.core import BoundingBox
-                    action.target_box = BoundingBox(
-                        x_min=box_data["x_min"],
-                        y_min=box_data["y_min"],
-                        x_max=box_data["x_max"],
-                        y_max=box_data["y_max"]
-                    )
-                
                 actions.append(action)
                 
             # Determine total duration
             duration = transcript.segments[-1].end if transcript.segments else 0.0
             
             timeline = Timeline(actions=actions, duration=duration)
-            log.info(f"Generated timeline with {len(actions)} actions.")
+            log.info(f"Generated timeline with {len(actions)} progressive handwriting actions.")
             return timeline
             
         except json.JSONDecodeError as e:
